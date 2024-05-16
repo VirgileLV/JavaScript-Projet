@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Morpion</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #eee;
+      font-size: 24px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="board"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const boardElement = document.querySelector('.board');
+
+    const createBoard = (gameState) => {
+      boardElement.innerHTML = '';
+      gameState.forEach((row, rowIndex) => {
+        row.forEach((cell, colIndex) => {
+          const cellElement = document.createElement('div');
+          cellElement.classList.add('cell');
+          cellElement.textContent = cell;
+          cellElement.addEventListener('click', () => {
+            socket.emit('makeMove', { row: rowIndex, col: colIndex });
+          });
+          boardElement.appendChild(cellElement);
+        });
+      });
+    };
+
+    socket.on('gameState', (gameState) => {
+      createBoard(gameState);
+    });
+
+    socket.on('gameOver', (winner) => {
+      alert(winner === 'Draw' ? "It's a draw!" : `${winner} wins!`);
+    });
+  </script>
+</body>
+</html>
